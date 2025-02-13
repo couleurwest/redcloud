@@ -1,0 +1,362 @@
+<Logo@Image>:
+    source: 'visuels/redcloud.png'
+    size_hint: None, None
+    size: 600, 435  # Définissez une taille explicite
+    pos_hint : {'center_x': 0.5, 'center_y': 0.5}
+
+<Background>:
+    canvas.before:
+        Color:
+            rgba:  self.theme.background
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    Logo:
+    Widget:
+        canvas.before:
+            Color:
+                rgba: 1,1,1,0.6
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+<CWLabel>:
+    color: app.theme.primary
+    bold: True
+    size_hint_y: None
+    height: self.texture_size[1]
+    align: 'left'
+    text_size: self.width, None  # Permet à Kivy d'ajuster le texte à la taille du label
+
+<Title1>:
+    font_size: '24sp'
+
+<Title2>:
+    font_size: '20sp'
+    color: app.theme.secondary
+
+<Title3>:
+    font_size: '18sp'
+    bold: False
+    color: app.theme.text_color
+
+<CWLegend@Widget>:
+    size_hint_y: None
+    height: 1
+    canvas:
+        Color:
+            rgba: app.theme.primary  # Couleur de la ligne
+        Line:
+            width: 2  # Largeur de la ligne
+            points: [self.x, self.center_y, self.right, self.center_y]  # La ligne est tracée sur toute la largeur de l'écran à la hauteur du centre du widget
+
+
+<CWLegend2@Widget>:
+    size_hint_y: None
+    height: 1
+    canvas:
+        Color:
+            rgba: app.theme.secondary  # Couleur de la ligne
+        Line:
+            width: 1.5  # Largeur de la ligne
+            points: [self.x, self.center_y, self.right, self.center_y]  # La ligne est tracée sur toute la largeur de l'écran à la hauteur du centre du widget
+<CWLink@Label>:
+    text: '[ref=lien]Cliquez ici[/ref] pour plus d\'infos'
+    markup: True  # Active les balises
+    color: 0, 0, 1, 1  # Couleur bleue
+    font_size: '14sp'
+    halign: "center"
+    valign: "middle"
+    text_size: self.size
+#    on_ref_press: app.on_link_click()
+# CWTextInput Text (saisie)
+<CWTextInput>:
+    hint_text: 'Entrez votre texte'
+    background_normal: ''  # Pas d'image de fond
+    #background_color:  app.theme.surface
+    foreground_color: app.theme.primary
+    size_hint_y: None
+    height: 40
+    text_align: 'left'  # Alignement du texte à gauche
+    padding: [10, 10]  # Espace intérieur (pour que le texte ne touche pas les bords)
+
+    canvas.before:
+        Color:
+            rgba: app.theme.tertiary if self.focus else app.theme.surface
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [10]
+        Color:
+            rgba: app.theme.accent if self.is_hovered and not self.focus else app.theme.secondary  if self.focus else app.theme.text_color # Couleur de la bordure en état de non-focus
+
+    canvas.after:
+        Color:
+            rgba: app.theme.accent if self.is_hovered and not self.focus else app.theme.secondary if self.focus else app.theme.text_color
+        Line:
+            width: 1.2 if self.focus else 0.5  # Bordure fine par défaut
+            rounded_rectangle: (self.x, self.y, self.width, self.height, 10)
+
+
+<ThemeManager>:
+    theme: app.theme
+    orientation: 'vertical'
+    Background:
+        BoxLayout:
+            canvas.before:
+                Color:
+                    rgba: 1,0,1,1
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+
+            orientation : 'vertical'
+            Title1:
+                text: 'Titleello, Kivy!'
+            CWLegend:
+                size_hint_y: None
+                height: 2
+
+            Title2:
+                text: 'Titleello, Dolly!'
+            Title3:
+                text: 'Boom, Dolly!'
+            CWTextInput:
+            ButtonYes:
+                text: 'Yes'
+            ButtonNo:
+                text: 'No'
+            CWLink:
+                trxt: 'Créer un compte'
+
+
+# Boutons (validation, annulation, autres actions)
+<ButtonTheme>:
+    theme: app.theme
+    background_normal: ''
+    background_color: (1,1,1,0)
+    color: app.theme.text_color if self.is_pressed else app.theme.accent
+    text_size: self.width, None
+    pos_hint: {"center_x": 0.5}
+    size_hint: None, None
+    height: 30
+    halign: 'center'
+    bold: self.is_hovered and not self.is_pressed
+
+    canvas.before:
+        Color:
+            rgba: self.theme.surface if self.is_pressed else (1,1,1,1) if self.is_hovered else  (1,1,1,0.5)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [10]
+        Color:
+            rgba: self.theme.surface if self.is_pressed  else self.theme.text_color
+        Line:
+            width: 1.2 if self.is_hovered or self.is_pressed else 1
+            rounded_rectangle: self.x, self.y, self.width, self.height, 15
+        Color:
+            rgba: self.theme.surface if self.is_pressed  else self.theme.text_color
+        Line:
+            width: 1
+            rounded_rectangle: self.x + 3, self.y + 3, self.width - 6, self.height - 6, 15
+
+# Boutons (validation, annulation, autres actions)
+<ButtonYes>:
+    color: self.theme.surface if self.is_pressed else app.theme.secondary if self.is_hovered else app.theme.text_color
+    canvas.before:
+        Color:
+            rgba: self.theme.text_color if self.is_pressed  else self.theme.secondary
+        Line:
+            width: 1.2 if self.is_hovered or self.is_pressed else 1
+            rounded_rectangle: self.x, self.y, self.width, self.height, 15
+        Color:
+            rgba: self.theme.text_color if self.is_pressed  else self.theme.secondary
+        Line:
+            width: 1
+            rounded_rectangle: self.x + 3, self.y + 3, self.width - 6, self.height - 6, 15
+
+<CWButtonOK>:
+    text: 'OK'
+    color: self.theme.success if  self.is_hovered or self.is_pressed else self.theme.text_color
+    canvas.before:
+        Color:
+            rgba: self.theme.success if self.is_pressed or self.is_hovered else self.theme.text_color
+        Line:
+            width: 1.2 if self.is_hovered or self.is_pressed else 1
+            rounded_rectangle: self.x, self.y, self.width, self.height, 15
+        Line:
+            width: 1
+            rounded_rectangle: self.x + 3, self.y + 3, self.width - 6, self.height - 6, 15
+
+<ButtonNo>:
+    color: app.theme.text_color if self.is_pressed else app.theme.primary
+    canvas.before:
+        Color:
+            rgba: app.theme.text_color if self.is_pressed  else app.theme.primary
+        Line:
+            width: 1.2 if self.is_hovered or self.is_pressed else 1
+            rounded_rectangle: self.x, self.y, self.width, self.height, 15
+        Color:
+            rgba: app.theme.text_color if self.is_pressed  else app.theme.primary
+        Line:
+            width: 1
+            rounded_rectangle: self.x + 3, self.y + 3, self.width - 6, self.height - 6, 15
+
+<CWButtonCancel>:
+    text: 'Annuler'
+    color: app.theme.warning if self.is_pressed else app.theme.text_color
+    canvas.before:
+        Color:
+            rgba: app.theme.warning if self.is_pressed else app.theme.text_color
+        Line:
+            width: 1.2 if self.is_hovered or self.is_pressed else 1
+            rounded_rectangle: self.x, self.y, self.width, self.height, 15
+        Color:
+            rgba: app.theme.warning if self.is_pressed else app.theme.text_color
+        Line:
+            width: 1
+            rounded_rectangle: self.x + 3, self.y + 3, self.width - 6, self.height - 6, 15
+
+
+<LoginButton@ButtonTheme>:
+    on_press: self.action()
+
+<CancelButton@ButtonTheme>:
+    on_press: self.action()
+
+<SigninScreen>:
+    BoxLayout:
+        padding: 10
+        spacing: 10
+
+        orientation: "vertical"
+        size_hint: None, None
+        size: 300,300
+        pos_hint: {"center_x": 0.5,"center_y": 0.5}
+        canvas.before:
+            Color:
+                rgba: 1,1,1,0.6
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+        Title1:
+            text: 'Enregistrement'
+        CWLegend:
+            size_hint_y: None
+            height: 1
+
+        CWTextInput:
+            hint_text: 'courriel'
+        CWTextInput:
+            hint_text: 'Mot de passe'
+
+        CWLegend2:
+            size_hint_y: None
+            height: 1
+        Title2:
+            text: 'Parametres redmine'
+        CWTextInput:
+            hint_text: 'URL'
+        CWTextInput:
+            hint_text: 'Clé API'
+        CWTextInput:
+            hint_text: 'pseudo'
+        GridLayout:
+            cols: 2
+            spacing: 20
+            padding: 20
+            halign: 'center'
+            size_hint: None, 1
+            CWButtonOK:
+                text: 'Yes'
+                pos_hint: {"center_x": 0.5}
+            CWButtonCancel:
+                text: 'No'
+                pos_hint: {"center_x": 0.5}
+
+<SigninNextcloudScreen>:
+    name: "nextcloud"
+    BoxLayout:
+        padding: 10
+        spacing: 10
+
+        orientation: "vertical"
+        size_hint: None, None
+        size: 300,300
+        pos_hint: {"center_x": 0.5,"center_y": 0.5}
+        canvas.before:
+            Color:
+                rgba: 1,1,1,0.6
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+        Title2:
+            text: 'Parametres Nextcloud'
+        CWLegend2:
+
+
+        CWTextInput:
+            hint_text: 'URL'
+        CWTextInput:
+            hint_text: 'login'
+        CWTextInput:
+            hint_text: 'Mot de passe'
+        GridLayout:
+            cols: 2
+            spacing: 20
+            padding: 20
+            halign: 'center'
+            size_hint: None, 1
+            CWButtonOK:
+                text: 'Yes'
+                pos_hint: {"center_x": 0.5}
+            CWButtonCancel:
+                text: 'No'
+                pos_hint: {"center_x": 0.5}
+
+<LoginScreen>:
+    BoxLayout:
+        padding: 10
+        spacing: 10
+
+        orientation: "vertical"
+        size_hint: None, None
+        size: 300,300
+        pos_hint: {"center_x": 0.5,"center_y": 0.5}
+        canvas.before:
+            Color:
+                rgba: 1,1,1,0.6
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+        Title1:
+            text: 'Connexion'
+        CWLegend:
+            size_hint_y: None
+            height: 1
+        CWTextInput:
+            name: 'pseudo'
+            hint_text: 'pseudo'
+        CWTextInput:
+            name: 'password'
+            hint_text: 'Mot de passe'
+        GridLayout:
+            cols: 2
+            spacing: 20
+            padding: 20
+            halign: 'center'
+            size_hint: None, 1
+            LoginButton:
+                text: 'OKes'
+                pos_hint: {"center_x": 0.5}
+            CancelButton:
+                text: 'Annuler'
+                pos_hint: {"center_x": 0.5}
+
+        CWLink:
+            text: 'Créer un compte'
+<RCScreenManager>:
+    SigninScreen:
+    SigninNextcloudScreen:
+    LoginScreen:
+    MainScreen:
