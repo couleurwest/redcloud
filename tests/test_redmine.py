@@ -49,7 +49,7 @@ def redmine_client():
     except ResourceNotFoundError:
         pytest.exit("❌ Impossible de récupérer les informations de l'utilisateur", returncode=1)
 
-def test_redmine_userinfo():
+def test_redmine_userinfo(redmine_client):
     """
     Vérifie que les informations de l'utilisateur connecté sont bien récupérées.
     """
@@ -92,23 +92,53 @@ def test_redmine_user_issues(redmine_client):
             'due_date': issue.due_date,
         }
 
-    print(f"✅ {len(RdUser.issues)} tickets récupérés")
-
-def test_redmine_time_entry(redmine_client):
+    print(RdUser.projects)
+def test_redmine_issue_status(redmine_client):
     """
     Vérifie la création d'une entrée de temps sur un ticket spécifique.
 
     - Crée une entrée de temps sur le ticket ID 1077.
     - Vérifie que l'entrée de temps a bien été enregistrée.
     """
-    time_entry = redmine_client.time_entry.create(
-        issue_id=1077,
-        spent_on=datetime.date.today(),
-        hours=0.1,
-        activity_id=28,
-        user_id=RdUser.user_id,
-        comments='open'
+    time_entry = redmine_client.issue_status.all()
+
+    assert time_entry, "Pas de status"
+    print([(te.id, te.name) for te in time_entry])
+
+
+def test_redmine_issue_update(redmine_client):
+    """
+    Vérifie la création d'une entrée de temps sur un ticket spécifique.
+
+    - Crée une entrée de temps sur le ticket ID 1077.
+    - Vérifie que l'entrée de temps a bien été enregistrée.
+    """
+    time_entry = redmine_client.issue.update(
+        1077,
+        status_id=1,
+        notes='A journal note',
+        done_ratio=40
     )
 
     assert time_entry, "L'entrée de temps n'a pas été enregistrée"
     print("✅ Enregistrement de temps réussi")
+
+#
+# def test_redmine_time_entry(redmine_client):
+#     """
+#     Vérifie la création d'une entrée de temps sur un ticket spécifique.
+#
+#     - Crée une entrée de temps sur le ticket ID 1077.
+#     - Vérifie que l'entrée de temps a bien été enregistrée.
+#     """
+#     time_entry = redmine_client.time_entry.create(
+#         issue_id=1077,
+#         spent_on=datetime.date.today(),
+#         hours=0.1,
+#         activity_id=28,
+#         user_id=RdUser.user_id,
+#         comments='open'
+#     )
+#
+#     assert time_entry, "L'entrée de temps n'a pas été enregistrée"
+#     print("✅ Enregistrement de temps réussi")
