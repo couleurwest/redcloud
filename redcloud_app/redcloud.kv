@@ -107,6 +107,8 @@
     padding: [10, 10]  # Espace intérieur (pour que le texte ne touche pas les bords)
     cursor_color: (1, 0, 0, 1)  # Rouge
     cursor_blink: True  # Active le clignotement du curseur
+    write_tab: False
+    hint_text_color: 3,3,3,0.7
 
     canvas.before:
         Color:
@@ -180,6 +182,7 @@
         Line:
             width: 1
             rounded_rectangle: self.x + 3, self.y + 3, self.width - 6, self.height - 6, 15
+
 <CWSpinnerOption>:
     background_normal: ""  # Supprime l'image par défaut
     background_color: app.theme.background if self.is_hovered else (0,0,0,0.3)
@@ -200,7 +203,7 @@
         Line:
             width: 1
             rounded_rectangle: self.x + 3, self.y + 3, self.width - 6, self.height - 6, 10
-
+    tab_focus: True
     option_cls: "CWSpinnerOption"  # Applique le style des options
     color: app.theme.text_color
     font_size: '13sp'
@@ -208,6 +211,7 @@
     align: 'center'
     sync_height: True
     height: 40
+<DateInput>:
 <MessageBox>
     orientation: 'vertical'
     padding: 10
@@ -219,7 +223,6 @@
     CWButton:
         id: button_dismiss
         text: "OK"
-
 
 <SigninScreen>:
     BoxLayout:
@@ -529,12 +532,10 @@
 
         Title1:
             text: "Détails de la demande"
-
         CWLegend:
-
         GridLayout:
             size_hint_y: None
-            height: 40
+            height: 60
             cols: 4
             rows: 2
             Title2:
@@ -552,109 +553,130 @@
             Title3:
                 text: root.priority
             Title3:
-                text: root.status
+                text: root.state
 
         CWLegend3:
-
         Title3:
             text: "Description"
-
         CWLegend3:
+        GridLayout:
+            cols: 2
+            spacing: 10
+            BoxLayout:
+                canvas.before:
+                    Color:
+                        rgba: 0.3, 0.3,0.3,0.1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                height: self.minimum_height
+                padding: 20
+                CWSimpleText:
+                    text: root.description
+                    pos_hint: {'center_x': 0.5,'y': 0.5}
 
-        CWSimpleText:
-            text: root.description
-            size_hint_y: None
-            padding: 20
+                    padding: 20
+            ScrollView:
+                size_hint_x: 0.5
+                orientation: 'vertical'
+                BoxLayout:
+                    canvas.before:
+                        Color:
+                            rgba: 0.3, 0.3,0.3,0.1
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                    padding: 20
+                    id: journals
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: self.minimum_height
 
         CWLegend2:
-
         BoxLayout:
             orientation: 'horizontal'
             spacing: 10
-
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_x: 0.65
-
-                GridLayout:
-                    spacing: 10
-                    rows: 2
-                    cols: 1
-
-                    BoxLayout:
-                        orientation: 'vertical'
-                        spacing: 10
-                        size_hint_y: None
-                        height: 150
-                        CWSimpleText:
-                            text: 'Notes:'
-                        CWTextInput:
-                            id: redmine_note
-                            text: "..."
-                            multiline: True
-                            size_hint_y: None
-                            height: 100
-
+            padding: 20
+            size_hint_y: None
+            height: 380
+            GridLayout:
+                spacing: 10
+                rows: 2
+                cols: 1
+                size_hint: 0.65, 1
                 BoxLayout:
-                    orientation: 'horitontal'
+                    orientation: 'vertical'
                     spacing: 10
-                    size_hint_y: None
-                    height: 80
+                    size_hint: 1, None
+                    height: 60
                     CWSimpleText:
-                        text: 'Réalisation : '
+                        text: 'Commentaire:'
                     CWTextInput:
-                        id: redmine_done_ration
-                    CWSimpleText:
-                        text: '%'
-
-            BoxLayout:
-                size_hint_x: 0.35
-                orientation: 'vertical'
-
-                GridLayout:
+                        id: redmine_commentaire
+                BoxLayout:
+                    orientation: 'vertical'
                     spacing: 10
-                    rows: 2
+                    size_hint: 1, None
+                    height: 230
+                    CWSimpleText:
+                        text: 'Notes:'
+                    CWTextInput:
+                        id: redmine_note
+                        text: "..."
+                        multiline: True
+                        height: '200dp'
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint: 0.35, 1
+                padding: 10
+                GridLayout:
+                    spacing: 20
                     cols: 2
-
+                    rows: 3
+                    CWSpinner:
+                        id: redmine_status
+                        values: root.status
+                        text: 'Status'
+                    CWSpinner:
+                        id: redmine_activity
+                        text: 'Activity'
+                        values: root.activities
                     BoxLayout:
                         orientation: 'vertical'
                         spacing: 10
-                        CWSpinner:
-                            id: redmine_status
-                            text: 'Status'
-
-                    BoxLayout:
-                        orientation: 'vertical'
-                        spacing: 10
-                        CWSpinner:
-                            id: redmine_activity
-                            text: 'Activity'
-                            values: root.time_tracker
-
-                    BoxLayout:
-                        orientation: 'vertical'
-                        spacing: 10
+                        size_hint: 1, None
+                        height: 60
                         CWSimpleText:
                             text: "Date de Valeur"
-                        CWTextInput:
+                        DateInput:
                             id: redmine_date
-                            text: "DD.MM.YYYY"
+                            hint_text: "DD/MM/YYYY"
                             halign: 'center'
                     BoxLayout:
                         orientation: 'vertical'
+                        size_hint: 1, None
+                        height: 60
                         spacing: 10
                         CWSimpleText:
                             text: "Temps passé"
                         CWTextInput:
                             id: redmine_time
-                            text: "2.1"
+                            hint_text: '0.0'
                             halign: 'center'
+                BoxLayout:
+                    size_hint: None, None
+                    width: 350
+                    height: 60
+                    spacing: 10
+                    padding:20
+                    pos_hint: {"center_x": 0.5}
+                    CWButtonOK:
+                        width: 150
+                        text: 'Enregistrer'
 
-                Widget:
-
+                    CWButton:
+                        width: 150
+                        text: "Retour"
+                        on_press: root.set_screen('dashboard')
+        CWLegend3:
         Widget:
-
-        Button:
-            text: "Retour"
-            size_hint_y: 0.1
-            on_press: app.root.current = "issue_list"

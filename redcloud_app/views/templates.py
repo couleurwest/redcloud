@@ -7,7 +7,6 @@ au sein de l'application, incluant des arrière-plans, des labels, des champs de
 from kivy.app import App
 from kivy.core.window import Window
 from kivy.properties import BooleanProperty, StringProperty
-from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -270,3 +269,20 @@ class CWButtonOK(ButtonTheme):
     """Bouton de validation."""
     def on_press(self):
         self.get_parent().validation()
+
+
+class DateInput(CWTextInput):
+    def insert_text(self, substring, from_undo=False):
+        """Ajoute une validation au format JJ/MM/AAAA"""
+        if not substring.isdigit() and substring != "/":
+            return  # Empêche l'entrée de lettres et autres symboles
+
+        text = self.text + substring  # Prévisualise l'entrée
+        if len(text) > 10:
+            return  # Empêche d'écrire plus de 10 caractères
+
+        # Ajoute automatiquement les '/' aux bonnes positions
+        if len(text) in [2, 5] and substring != "/":
+            substring += "/"
+
+        super().insert_text(substring, from_undo=from_undo)

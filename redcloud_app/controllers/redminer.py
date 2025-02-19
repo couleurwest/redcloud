@@ -38,6 +38,7 @@ class Redminer:
     projects = {}
     issues = {}
     status = []
+    journals = []
 
     def __init__(self, redmine_login: str, redmine_key: str,redmine_password: str, otp_secret: str, email:str):
         """
@@ -104,7 +105,7 @@ class Redminer:
             issues = redmine_client.issue.filter(
                 assigned_to_id=redmine_user.id,
                 sort='project_id:asc;due_date:desc',
-                status_id='open'
+                status_id='open', include=['journals']
             )
 
             for issue in issues:
@@ -125,8 +126,10 @@ class Redminer:
                     'status': issue.status.name,
                     'category': issue.category.name if hasattr(issue, "category") else '',
                     'description': issue.description,
-                    'due_date': issue.due_date.strftime("%d.%m.%Y")
+                    'due_date': issue.due_date.strftime("%d.%m.%Y") if  issue.due_date else '',
+                    'journals': [ journal.notes for journal in issue.journals if journal.notes][-3:]  # Prendre les
                 }
+
                 nextcloud_account= {
                     'nextcloud_url': config['nextcloud_url'],
                     'nextcloud_login': config['nextcloud_login'],
@@ -138,7 +141,7 @@ class Redminer:
         raise AuthError("Échec de l'authentification : identifiants non valides")
 
     def post_activity(self, issue_id: int, hours: float, spent_on: str, activity_id: int,
-                      commentaire: str, status_id: int = None, done_ratio: int = None, note: str = ""):
+                      commentaire: str, status_id: int = None, note: str = "", done_ratio: int = None):
         """
         Enregistre une activité (temps passé) sur un ticket et peut mettre à jour son statut.
 

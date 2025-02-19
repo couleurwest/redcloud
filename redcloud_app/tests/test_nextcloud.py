@@ -9,16 +9,19 @@ import random
 import httpx
 import pytest
 import requests
+from httpx import HTTPStatusError
 from requests.auth import HTTPBasicAuth
 
 # 🔹 Remplace avec l'URL de ton serveur Nextcloud et tes identifiants
 NEXTCLOUD_URL = "https://sft.gcsguyasis.fr/"
-USERNAME = "dreamgeeker"
-PASSWORD = "CNX9cwest!T3"
+USERNAME = "klentin"
+PASSWORD = "-$onG0h1n-"
 HEADERS = {
-    "Content-Type": "application/json",
-    "OCS-APIRequest": "true"
+    'Content-Type': 'application/json;charset=utf-8',
+    'OCS-APIRequest': 'True',
+    'Accept': 'application/json'
 }
+
 
 PROJET = {
     'redmine_project' : 'Beloud',
@@ -43,11 +46,11 @@ class Nextclouder:
     ____URL_USER_BOARDS = "{}index.php/apps/deck/api/v1.0/boards"
     __URL_USER_STACK = "{}index.php/apps/deck/api/v1.0/boards/{}/stacks"
     __URL_USER_LABEL = "{}index.php/apps/deck/api/v1.0/boards/{}/labels"
-    __URL_USER_CARD = "{}index.php/apps/deck/api/v1.0/boards/{}/stacks/{}/cards"
-    __URL_LABEL_ASSIGN = "{}/index.php/apps/deck/api/v1.0/boards/{}/stacks/{}/cards/{}/assignLabel"
+    __URL_USER_CARD = "{}index.php/apps/deck/api/v1.0/boards/{}/stacks/{}"
+    __URL_LABEL_ASSIGN = "{}index.php/apps/deck/api/v1.0/boards/{}/stacks/{}/cards/{}/assignLabel"
     __URL_LABEL_REMOVE = "{}index.php/apps/deck/api/v1.0/boards/{}/stacks/{}/cards/{}/removeLabel"
     __URL_USER_ASSIGN = "{}index.php/apps/deck/api/v1.0/boards/{}/stacks/{}/cards/{}/assignUser"
-    __URL_USER_COMMENT = "{}ocs/v2.php/apps/deck/api/v1.0/cards/{cardId}/comments"
+    __URL_USER_COMMENT = "{}ocs/v2.php/apps/deck/api/v1.0/cards/{}/comments"
 
     LST_STATUS = [
         ('2', 'In progress','cours'),
@@ -58,13 +61,19 @@ class Nextclouder:
 
     @classmethod
     async def set_comment(self, client, card_id, message):
-        url = Nextclouder.__URL_LABEL_ASSIGN.format(NEXTCLOUD_URL, card_id)
+        url = Nextclouder.__URL_USER_COMMENT.format(NEXTCLOUD_URL, card_id)
         await self.httpx_requests(client, url, method='POST', params={'message': message})
 
     @classmethod
     async def assign_label(cls, client:httpx.AsyncClient, nextcloud_board_id, stack_id, card_id, label_id):
         url = Nextclouder.__URL_LABEL_ASSIGN.format(NEXTCLOUD_URL, nextcloud_board_id, stack_id, card_id)
         await cls.httpx_requests(client,url,method='PUT', params={'labelId': label_id})
+
+    @classmethod
+    async def remove_label (cls, client, nextcloud_board_id, nextcloud_stack_id, nextcloud_card_id, nextcloud_label_id):
+        url = Nextclouder.__URL_LABEL_REMOVE.format(NEXTCLOUD_URL, nextcloud_board_id, nextcloud_stack_id, nextcloud_card_id)
+
+        await cls.httpx_requests(client, url, method='PUT', params={'labelId': nextcloud_label_id})
 
     @staticmethod
     async def httpx_requests(client, url, method='GET', params=None):
@@ -130,52 +139,70 @@ class Nextclouder:
         await cls.httpx_requests(client, url, method='DELETE')
 
     @classmethod
-    async def find_or_create_card(cls, client, nextcloud_board_id, nextcloud_stack_id, nextcloud_card_title,
-                                  nextcloud_card_description, nextcloud_card_due_date):
-        url = Nextclouder.__URL_USER_CARD.format(NEXTCLOUD_URL, nextcloud_board_id, nextcloud_stack_id)
-
-        stack = await cls.httpx_requests(client, url)
-
-        if 'cards' in stack:
+    async def find_card(cls, client, nextcloud_board_id,  nextcloud_card_title):
+        url = Nextclouder.__URL_USER_STACK.format(NEXTCLOUD_URL, nextcloud_board_id)
+        stacks = await cls.httpx_requests(client, url)
+        for stack in stacks:
             for card in stack['cards']:
                 if card['title'] == nextcloud_card_title:
-                    break
-                card = None
+                    return  stack['id'], card
 
-        if card is None:
+        return None,None
+
+    @classmethod
+    async def find_or_create_card(cls, client, nextcloud_board_id, nextcloud_stack_id, nextcloud_card_title,
+                                  nextcloud_card_description, nextcloud_card_due_date):
+
+        card_stack_id, card = await cls.find_card(client, nextcloud_board_id,  nextcloud_card_title)
+        if card and card_stack_id!= nextcloud_stack_id:
+            url = Nextclouder.__URL_USER_CARD.format(NEXTCLOUD_URL, nextcloud_board_id, card_stack_id)
+            await cls.httpx_requests(client,  f'{url}/cards/{card['id']}/reorder', method='PUT',  params={'stackId':nextcloud_stack_id, 'order':0 })
+        elif card is None:
+            url = Nextclouder.__URL_USER_CARD.format(NEXTCLOUD_URL, nextcloud_board_id, nextcloud_stack_id)
             due_date = nextcloud_card_due_date.isoformat() if nextcloud_card_due_date else None
             card = {
                 "title": nextcloud_card_title,
-                "type": "text/markdown",  # "plain" (texte brut) ou "text/markdown" (formaté)
+                "type": "plain",  # "plain" (texte brut) ou "text/markdown" (formaté)
                 "description": nextcloud_card_description,
                 "order": 0,
                 "duedate": due_date
             }
-            card = await cls.httpx_requests(client, url, method='POST', params=card)
+            card = await cls.httpx_requests(client, f'{url}/cards', method='POST', params=card)
 
         return card
+
+    @classmethod
+    async def assign_user(cls, client: httpx.AsyncClient, nextcloud_board_id, stack_id, card_id, user_id):
+        url = Nextclouder.__URL_USER_ASSIGN.format(NEXTCLOUD_URL, nextcloud_board_id, stack_id, card_id)
+        try:
+            await cls.httpx_requests(client, url, method='PUT', params={'userId': user_id})
+        except HTTPStatusError as exs:
+            if exs.response.status_code != 400:
+                raise exs
+
 
 
 @pytest.mark.asyncio
 async def test_nextcloud_boards():
     """Test : Vérifier que la connexion à Nextcloud est réussie."""
-
-    board = None
     labels_id = []
     labels_to_remove = []
     nextcloud_category = PROJET['category']
     nextcloud_priority = PROJET['priority'][0]
 
-    async with httpx.AsyncClient(auth=(USERNAME, PASSWORD)) as client:
+    async with httpx.AsyncClient(auth=(USERNAME, PASSWORD), verify=False, base_url=NEXTCLOUD_URL) as client:
         while nextcloud_category or nextcloud_priority or Nextclouder.board is None:
             Nextclouder.board = await Nextclouder.find_or_create_board(client, PROJET['redmine_project'])
 
-            assert Nextclouder.board, 'ecration bord pof'
+            assert Nextclouder.board, 'creation board pof'
+            print('1 - Board : OK =>', Nextclouder.board)
 
             board_id = Nextclouder.board['id']
             nextcloud_stack = Nextclouder.board.pop('stacks')
+            print('2 - Stacks : OK =>', nextcloud_stack)
 
             nextcloud_label = Nextclouder.board.pop('labels') or []
+            print('3 - Label : OK =>', nextcloud_label)
 
             for label in nextcloud_label:
                 label_id = label['id']
@@ -206,34 +233,61 @@ async def test_nextcloud_boards():
 
 @pytest.mark.asyncio
 async def test_nextcloud_card():
-    async with httpx.AsyncClient(auth=(USERNAME, PASSWORD)) as client:
+    async with httpx.AsyncClient(auth=(USERNAME, PASSWORD), verify=False, base_url=NEXTCLOUD_URL) as client:
         projet_status = PROJET['status'][0]
         stacks = list(filter(lambda status: status[2] in projet_status.lower(), Nextclouder.LST_STATUS))
         stack_name = stacks[0][1] if stacks else 'In stand by'
 
-        stacks = list(filter(lambda stack: stack['title'] == stack_name, Nextclouder.stacks)),
-        stack_id = stacks['id']
+        stacks = list(filter(lambda stack: stack['title'] == stack_name, Nextclouder.stacks))
+        stack_id = stacks[0]['id']
 
         card = await Nextclouder.find_or_create_card(client, Nextclouder.board['id'],
                                                      stack_id, PROJET['issue_title'],
-                                                     PROJET['issue_title'], PROJET['issue_title'])
+                                                     PROJET['description'], PROJET['due_date'])
         card_id = card['id']
+        for label in Nextclouder.labels:
+            await Nextclouder.remove_label(client, Nextclouder.board['id'], stack_id, card_id, label['id'])
+
         labels_to_assign = list(filter(lambda label: label['title'] in [PROJET['category'],PROJET['priority'][0]],
                                        Nextclouder.labels))
         labels_id = list(map(lambda label: label['id'], labels_to_assign))
-        card_label_to_assign = labels_id.copy()
-        if card.get('labels'):
-            for assigned_labels_id in card['labels']:
-                if assigned_labels_id  in labels_id:
-                    card_label_to_assign.remove(assigned_labels_id)
-                else:
-                    await Nextclouder.remove_label(client, Nextclouder.board['id'], stack_id, card_id, labels_id)
 
+        for lid in labels_id:
+            await Nextclouder.assign_label(client, Nextclouder.board['id'], stack_id, card_id, lid)
 
-        for label_id in card_label_to_assign:
-            await Nextclouder.assign_label(client, Nextclouder.board['id'], stack_id, card_id, label_id)
-
-        await  Nextclouder.set_comment(client, card_id, PROJET['detail'][0])
+        await Nextclouder.set_comment(client, card_id, PROJET['detail'][0])
         assigned_users = card.get('assignedUsers', [])
         if USERNAME not in assigned_users:
-            await assigned_users
+            await Nextclouder.assign_user(client, Nextclouder.board['id'], stack_id, card_id, USERNAME)
+
+
+@pytest.mark.asyncio
+async def test_nextcloud_update():
+
+    nextcloud_priority = PROJET['priority'][0]
+
+    async with httpx.AsyncClient(auth=(USERNAME, PASSWORD), verify=False, base_url=NEXTCLOUD_URL) as client:
+        projet_status = PROJET['status'][1]
+        stacks = list(filter(lambda status: status[2] in projet_status.lower(), Nextclouder.LST_STATUS))
+        stack_name = stacks[0][1] if stacks else 'In stand by'
+        stacks = list(filter(lambda stack: stack['title'] == stack_name, Nextclouder.stacks))
+        stack_id = stacks[0]['id']
+
+        card = await Nextclouder.find_or_create_card(client, Nextclouder.board['id'],
+                                                     stack_id, PROJET['issue_title'],
+                                                     PROJET['description'], PROJET['due_date'])
+        card_id = card['id']
+        for label in Nextclouder.labels:
+            await Nextclouder.remove_label(client, Nextclouder.board['id'], stack_id, card_id, label['id'])
+
+        labels_to_assign = list(filter(lambda label: label['title'] in [PROJET['category'],PROJET['priority'][1]],
+                                       Nextclouder.labels))
+        labels_id = list(map(lambda label: label['id'], labels_to_assign))
+
+        for lid in labels_id:
+            await Nextclouder.assign_label(client, Nextclouder.board['id'], stack_id, card_id, lid)
+
+        await Nextclouder.set_comment(client, card_id, PROJET['detail'][1])
+        assigned_users = card.get('assignedUsers', [])
+        if USERNAME not in assigned_users:
+            await Nextclouder.assign_user(client, Nextclouder.board['id'], stack_id, card_id, USERNAME)

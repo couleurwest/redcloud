@@ -31,7 +31,7 @@ class  LoginScreen(Background):
                 redmine_user,
                 redmine_user_password
             )
-            Constantine.nextcloud_account = Nextclouder(**nextcloud_account) if nextcloud_account else None
+            Constantine.nextcloud_account = Nextclouder.login(redmine_user, redmine_user_password, **nextcloud_account) if nextcloud_account else None
             validation = True
         except FileExistsError as fex:
             message = fex.__str__()

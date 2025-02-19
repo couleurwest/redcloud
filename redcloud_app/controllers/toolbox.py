@@ -21,3 +21,9 @@ def read_config(file_path):
         except yaml.YAMLError as e:
             print(f"Erreur de lecture du fichier YAML : {e}")
             return None
+
+def spilt_uuid (v, separator:str = '-'):
+    lst = v.split(separator)
+    uuid = lst[0]
+    v = separator.join(lst[1:])
+    return  uuid, v
