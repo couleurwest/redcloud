@@ -1,0 +1,93 @@
+<Formulaire>:
+    orientation: 'vertical'
+    padding: 20
+    spacing: 15
+    canvas.before:
+        Color:
+            rgba: 0.98, 0.95, 0.92, 1  # Fond doux légèrement teinté
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    Label:
+        text: "Formulaire d'Inscription"
+        font_size: "24sp"
+        bold: True
+        color: 0.1, 0.1, 0.1, 1
+        halign: "center"
+
+    TextInput:
+        id: nom
+        hint_text: "Nom"
+        size_hint_x: None
+        width: 300
+        pos_hint: {"center_x": 0.5}
+        background_color: (1, 1, 1, 1)
+        foreground_color: (0, 0, 0, 1)
+
+    Label:
+        text: "Sexe"
+        font_size: "18sp"
+        color: 0.2, 0.2, 0.2, 1
+
+    BoxLayout:
+        size_hint_x: None
+        width: 300
+        pos_hint: {"center_x": 0.5}
+        spacing: 20
+
+        CheckBox:
+            group: "sexe"
+        Label:
+            text: "Homme"
+            size_hint_x: None
+            width: 100
+
+        CheckBox:
+            group: "sexe"
+        Label:
+            text: "Femme"
+            size_hint_x: None
+            width: 100
+
+    Label:
+        text: "Mois de naissance"
+        font_size: "18sp"
+        color: 0.2, 0.2, 0.2, 1
+
+    Spinner:
+        id: mois_naissance
+        text: "Sélectionner un mois"
+        values: ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
+        size_hint_x: None
+        width: 300
+        pos_hint: {"center_x": 0.5}
+
+    BoxLayout:
+        size_hint_x: None
+        width: 300
+        pos_hint: {"center_x": 0.5}
+        spacing: 10
+
+        CheckBox:
+            id: checkbox
+        Label:
+            text: "J'accepte les conditions"
+            size_hint_x: None
+            width: 200
+
+    Button:
+        text: "Envoyer"
+        size_hint: None, None
+        size: 200, 50
+        pos_hint: {"center_x": 0.5}
+        background_normal: ""  # Supprime le fond par défaut
+        background_color: 0, 0, 0, 0  # Fond transparent
+        border: (2, 2, 2, 2)
+        color: 0.8, 0.2, 0.2, 1  # Texte rouge brique
+        canvas.before:
+            Color:
+                rgba: 0.8, 0.2, 0.2, 1  # Contour rouge brique
+            Line:
+                width: 2
+                rounded_rectangle: (self.x, self.y, self.width, self.height, 15)
