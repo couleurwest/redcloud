@@ -328,77 +328,8 @@
         CWLink:
             text: 'Réinitiliser mon compte'
 
-<OTPLoginScreen>:
-    BoxLayout:
-        padding: 10
-        spacing: 10
-        orientation: "vertical"
-        size_hint: None, None
-        size: 360,260
-        pos_hint: {"center_x": 0.5,"center_y": 0.5}
-        canvas.before:
-            Color:
-                rgba: 1,1,1,0.6
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-        Title2:
-            text: "Saisir le code OPT"
-        CWLegend2:
-            size_hint_y: None
-            height: 1
-        Widget:
-        CWTextInput:
-            id: otp_input
-            hint_text: "000000"
-            size_hint_x: None
-            pos_hint: {"center_x": 0.5,"center_y": 0.5}
-            width: 200
-            font_size: 20
-            height: 44
-            halign: "center"
-            valign: "middle"
-        Widget:
-        GridLayout:
-            cols: 2
-            rows: 1
-            spacing: 10
-            padding: 10
-            halign: 'center'
-            BoxLayout:
-                orientation: 'vertical'
-                OTPButton:
-                    text: 'OK'
-                    pos_hint: {"center_x": 0.5,"center_x": 0.5}
-            BoxLayout:
-                orientation: 'vertical'
-                CWButtonCancel:
-                    text: 'Annuler'
-                    pos_hint: {"center_x": 0.5,"center_x": 0.5}
-
-        Widget:
 
 <OTPSigninScreen>:
-    GridLayout:
-        cols: 2
-        padding: 20
-        spacing: 10
-        BoxLayout:
-            orientation: "vertical"
-            size_hint_x: 0.6
-            spacing: 10
-            Widget:  # Espace pour centrer verticalement
-            Image:
-                id: qrcode_image
-                size_hint: (None, None)
-                size: (200, 200)
-                allow_stretch: True
-                pos_hint: {"center_x": 0.5,"center_x": 0.5}
-            CWSimpleText:
-                id: secret_key
-                text: "Clé secrète :"
-                pos_hint: {"center_x": 0.5}
-            Widget:  # Espace pour centrer verticalement
 
         BoxLayout:
             orientation: "vertical"
@@ -425,57 +356,7 @@
                     text: 'Annuler'
             Widget:  # Espace pour centrer verticalement
 
-
-<NextcloudScreen>:
-    BoxLayout:
-        padding: 10
-        spacing: 10
-        orientation: "vertical"
-        size_hint: None, None
-        size: 380,320
-        pos_hint: {"center_x": 0.5,"center_y": 0.5}
-        canvas.before:
-            Color:
-                rgba: 1,1,1,0.6
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-        Title1:
-            text: 'Paramètres Nextcloud'
-        CWLegend:
-        CWTextInput:
-            id: nextcloud_user
-            hint_text: 'login'
-            text: 'klentin'
-            focus: True
-        CWTextInput:
-            id: nextcloud_password
-            hint_text: 'Mot de passe'
-            password: True
-            text: '-$onG0h1n-'
-        CWLegend2:
-            size_hint_y: None
-            height: 1
-        CWTextInput:
-            id: nextcloud_url
-            hint_text: 'URL'
-            text: 'https://sft.gcsguyasis.fr/'
-        GridLayout:
-            cols: 2
-            rows: 1
-            spacing: 20
-            padding: 20
-            halign: 'center'
-            BoxLayout:
-                orientation: 'vertical'
-                LoginNextcloudButton:
-                    text: 'Yes'
-                    pos_hint: {"center_x": 0.5,"center_x": 0.5}
-            BoxLayout:
-                orientation: 'vertical'
-                CWButtonCancel:
-                    text: 'Annuler'
-                    pos_hint: {"center_x": 0.5,"center_x": 0.5}
+}
 <DashScreen>:
     BoxLayout:
         orientation: "vertical"

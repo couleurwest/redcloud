@@ -40,7 +40,7 @@ class Redminer:
     status = []
     journals = []
 
-    def __init__(self, redmine_login: str, redmine_key: str,redmine_password: str, otp_secret: str, email:str):
+    def __init__(self, redmine_login: str, redmine_password: str,redmine_url: str, redmine_key: str,otp_secret: str):
         """
         Initialise un objet Redminer.
 
@@ -48,7 +48,9 @@ class Redminer:
         :param redmine_key: Clé API Redmine.
         :param otp_secret: Clé OTP associée à l'utilisateur.
         """
-        self.redmine_login, self.__redmine_key,self.redmine_password, self.otp_secret, self.email = redmine_login, redmine_key,redmine_password, otp_secret, email
+        self.redmine_login, self.__redmine_key,self.redmine_password, self.otp_secret = (
+            redmine_login, redmine_key,redmine_password, otp_secret)
+        self.__redmine_url = redmine_url
 
     @classmethod
     def signin(cls, redmine_login: str, redmine_password: str, redmine_key: str, redmine_url: str):
@@ -61,6 +63,7 @@ class Redminer:
         :param redmine_url: URL du serveur Redmine.
         :return: Instance de Redminer si l'inscription est réussie, sinon None.
         """
+
         if  Authentication.check_config_file():
             raise FileExistsError ('Un compte a ete configurer pour ce poste')
 
@@ -68,8 +71,7 @@ class Redminer:
         redmine_user = redmine_client.user.get('current')
 
         if redmine_user and redmine_user.login == redmine_login:
-            otp_secret = Authentication.signin(redmine_login, redmine_password, redmine_key, redmine_url)
-            return Redminer(redmine_login, redmine_key,redmine_password, otp_secret, redmine_user.mail)
+            return Redminer(redmine_login, redmine_password, redmine_url, redmine_key, None)
 
         raise AuthError("Échec de l'authentification : identification impossible")
 
@@ -93,9 +95,9 @@ class Redminer:
             redmine_user = redmine_client.user.get('current')
 
             if redmine_login != redmine_user.login:
-                raise AuthError("Échec de l'authentification : identifiants non valides")
+                raise AuthError()
 
-            redmine_account = Redminer(redmine_login, config['redmine_key'], redmine_password, config['otp_secret'],redmine_user.mail)
+            redmine_account = Redminer(redmine_login, redmine_password,  config['redmine_url'], config['redmine_key'],config['otp_secret'])
 
             # Récupération des statuts de tickets
             issues_status = redmine_client.issue_status.all()
@@ -172,5 +174,10 @@ class Redminer:
                                             comments=commentaire):
             print("✅ Enregistrement du temps réussi.")
 
-    def get_otp_param (self):
-        return self.otp_secret, self.email
+    def document (self):
+        return  {
+                "login": self.redmine_login,
+                "redmine_url": self.__redmine_url,
+                "redmine_key": self.__redmine_key,
+                "otp_secret": self.otp_secret
+            }

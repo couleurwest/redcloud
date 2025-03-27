@@ -3,8 +3,8 @@ from redcloud_app.controllers.redminer import Redminer
 
 
 class Constantine:
-    redmine_account: Redminer
-    nextcloud_account: Nextclouder
+    redmine_account: Redminer | None = None
+    nextcloud_account: Nextclouder | None = None
     redcloud_status = [
         ('validation', 'In release'),
         ('cours', 'In progress'),

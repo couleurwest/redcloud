@@ -114,37 +114,6 @@ class Authentication:
         return os.path.exists(Authentication.CONFIG_FILE)
 
     @classmethod
-    def signin(cls, login: str, password: str, redmine_key: str, redmine_url: str) -> str:
-        """
-        Crée un compte sécurisé et génère une clé secrète OTP.
-
-        :param login: Identifiant de l'utilisateur.
-        :type login: str
-        :param password: Mot de passe pour chiffrer les données.
-        :type password: str
-        :param redmine_key: Clé API de Redmine.
-        :type redmine_key: str
-        :param redmine_url: URL du serveur Redmine.
-        :type redmine_url: str
-        :return: Clé secrète OTP pour l'utilisateur.
-        :rtype: str
-        """
-        print("⚙️ Création d'un compte sécurisé.")
-
-        otp_secret = generate_otp_secret()
-
-        data = {
-            "login": login,
-            "redmine_url": redmine_url,
-            "redmine_key": redmine_key,
-            "otp_secret": otp_secret
-        }
-
-        cls.encrypt_data(data, password)
-        print("✅ Fichier sécurisé créé avec succès.")
-        return otp_secret
-
-    @classmethod
     def authenticate_user(cls, login: str, password: str) -> dict:
         """
         Authentifie un utilisateur en vérifiant son login et son mot de passe.

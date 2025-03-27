@@ -92,8 +92,7 @@ class Nextclouder:
         }
 
     @classmethod
-    async def login(cls, redmine_login: str, redmine_password: str, nextcloud_login: str, nextcloud_password: str,
-                    nextcloud_url: str):
+    async def login(cls, nextcloud_login: str, nextcloud_password: str, nextcloud_url: str):
         """
         Authentifie un utilisateur Nextcloud et récupère son ID.
 
@@ -103,13 +102,11 @@ class Nextclouder:
         async with httpx.AsyncClient(auth=(nextcloud_login, nextcloud_password), base_url=nextcloud_url) as client:
             user = await nextcloud_account.httpx_requests(client, cls.__URL_USER_CONNEXION)
             nextcloud_account.nextcloud_user_id = user.get('id', '')
-            Authentication.update_config(redmine_login, redmine_password, nextcloud_url=nextcloud_url,
-                                         nextcloud_login=nextcloud_login, nextcloud_password=nextcloud_password,
-                                         nextcloud_user_id=nextcloud_account.nextcloud_user_id)
+
         return nextcloud_account
 
 
-    async def assign_user(self, client:httpx.AsyncClient, board_id, stack_id, card_id, user_id):
+    async def assign_user(self, client, board_id, stack_id, card_id, user_id):
         """
         Assigne un utilisateur à une carte Deck.
 
@@ -172,7 +169,7 @@ class Nextclouder:
         current_stack_id, card = await self.find_card(client, board_id, card_title)
         if card and current_stack_id != stack_id:
             url = Nextclouder.__URL_USER_CARD_REORDER.format( board_id, current_stack_id, card['id'])
-            self.httpx_requests(client, url, method='PUT', params={'stackId': stack_id, 'order': 0})
+            await self.httpx_requests(client, url, method='PUT', params={'stackId': stack_id, 'order': 0})
         elif card is None:
             due_date = due_date.isoformat() if due_date else None
             card = {
@@ -212,7 +209,7 @@ class Nextclouder:
             board = await self.httpx_requests(client, url+f'/{board_id}',  params={'details': True})
 
             for label_id in boards['labels']:
-                self.delete_label(client, board_id, label_id)
+                await self.delete_label(client, board_id, label_id)
 
         return board
 
