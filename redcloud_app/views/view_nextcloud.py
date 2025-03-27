@@ -26,13 +26,11 @@ class NextcloudScreen(BoxView):
         # Champ mot de passe
         password_label = toga.Label("Mot de passe:", style=Pack(margin=5))
         self.nextcloud_password = toga.PasswordInput()
-        self.nextcloud_password.value = "-Gonk3r0r-"
 
         box_subtitle_hr = HR(color=ColorPalette.SECONDARY)
 
         url_label = toga.Label("URL:", style=Pack(margin=5))
         self.nextcloud_url = toga.TextInput(placeholder="https://cie.redminer.me", style=Pack(margin=5))
-        self.nextcloud_url.value = "https://nubo.3p0.net"
 
         # Bouton de connexion
         button_validation = toga.Button("Enregistrement", on_press=lambda widget: asyncio.create_task(self.validation()))

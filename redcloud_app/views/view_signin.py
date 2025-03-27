@@ -23,23 +23,19 @@ class SigninScreen(BoxView):
 
         username_label = toga.Label("Login:", style=Pack(margin=5))
         self.username_input = toga.TextInput(placeholder="Entrez votre login redmine")
-        self.username_input.value = "dreamgeeker"
 
         # Champ mot de passe
         password_label = toga.Label("Mot de passe:", style=Pack(margin=5))
         self.password_input = toga.PasswordInput()
-        self.password_input.value = 'Dr3@mK!tch5R#76'
 
         box_subtitle_hr = HR(color=ColorPalette.SECONDARY)
 
 
         url_label = toga.Label("URL:", style=Pack(margin=5))
         self.url_redmine = toga.TextInput(placeholder="https://cie.redminer.me", style=Pack(margin=5))
-        self.url_redmine.value = "https://workflow.couleurwest-it.com"
 
         apikey_label = toga.Label("Clé API", style=Pack(margin=5))
         self.api_key = toga.PasswordInput()
-        self.api_key.value = "815f1976f3b9536c839bd04f1bf875aa0aec6926"
 
         # Bouton de connexion
 
