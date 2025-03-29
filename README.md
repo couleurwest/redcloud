@@ -1,45 +1,47 @@
-# RedCloud
+# Redcloud
 
 ## 🚀 Présentation
-**RedCloud** est une passerelle entre **Redmine** et **Nextcloud Deck**, permettant une gestion centralisée des tickets sous forme de tableau kanban.
+**Redcloud** est une application desktop permettant de synchroniser facilement **Redmine** et **Nextcloud Deck**, en transformant les tickets en tableaux kanban.
 
 ### 🎯 Fonctionnalités principales
-- 📌 **Création automatique des Decks** dans Nextcloud à partir d'un projet Redmine.
-- 🏷️ **Étiquettes des tâches** basées sur les trackers Redmine.
+- 📌 **Création automatique des Decks** dans Nextcloud à partir des projets Redmine.
+- 🏷️ **Attribution d'étiquettes** basée sur les trackers Redmine.
 - 📊 **Colonnes dynamiques** représentant les statuts du projet.
-- 🔄 **Mise à jour bidirectionnelle** entre Redmine et Deck :
-  - Création et modification des tâches.
-  - Mise à jour des statuts, dates et commentaires.
-- ⚙️ **Sélection des statuts** (manuel ou récupération automatique depuis Redmine).
+- 🔄 **Ajout des éléments** sans modification des existants.
+- ⚙️ **Configuration propre à chaque utilisateur** et chiffrée.
 
 ## 🛠️ Installation
 ### Prérequis
-- Un serveur **Redmine** avec une API activée.
+- Un serveur **Redmine** avec l'API activée.
 - Un serveur **Nextcloud** avec l’application **Deck** installée.
-- Python 3 et les dépendances nécessaires.
+- **Python 3** et les dépendances nécessaires.
 
 ### 🔧 Configuration
-1. Clonez le dépôt :
+1. **Clonez le dépôt** :
    ```sh
    git clone https://github.com/votre-utilisateur/redcloud.git
-   cd redcloud
+   cd redcloud_app
    ```
-2. Installez les dépendances :
+2. **Installez les dépendances** :
    ```sh
    pip install -r requirements.txt
    ```
-   
+3. **Lancez l'application** :
    ```sh
-   python redcloud.py
+   python redcloud_app.py
    ```
 
 ## 📌 Usage
-- **Création automatique** : Ajoutez un projet Redmine, un Deck sera généré avec ses colonnes et étiquettes.
-- **Mise à jour des tâches** : Modifiez une carte dans Deck, elle sera mise à jour dans Redmine (et inversement).
-- **Gestion des commentaires** : Ajoutez un commentaire sur une carte, il sera enregistré dans Redmine.
+- **Création automatique** : un projet Redmine génère un Deck avec ses colonnes et étiquettes.
+- **Ajout des tâches** : nouvelles tâches synchronisées entre Redmine et Deck.
+- **Aucun suivi des modifications** : l'application ne gère pas les conflits, elle ajoute simplement les nouveaux éléments.
+
+## 🔐 Sécurité & Authentification
+- L'authentification repose uniquement sur **Redmine**.
+- La configuration est **chiffrée** avec une clé basée sur le mot de passe utilisateur.
 
 ## 📝 Licence
-RedCloud est distribué sous licence **Apache 2.0**. Consultez le fichier [`LICENSE`](./LICENSE) pour plus de détails.
+Redcloud est distribué sous licence **Apache 2.0**. Consultez le fichier [`LICENSE`](./LICENSE) pour plus de détails.
 
 ## 🤝 Contribuer
 Les contributions sont les bienvenues !
@@ -51,5 +53,5 @@ Les contributions sont les bienvenues !
 Pour toute question, ouvrez une issue ou contactez-moi à [email@example.com](mailto:email@example.com).
 
 ---
+🚀 *Redcloud, synchronisez vos tickets Redmine avec Nextcloud Deck en toute simplicité !*
 
-🚀 *RedCloud, simplifiez la gestion de vos tickets Redmine avec Nextcloud Deck !*

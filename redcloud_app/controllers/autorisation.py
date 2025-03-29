@@ -22,7 +22,7 @@ def show_qr_code(secret: str, email: str):
     :type email: str
     """
     totp = pyotp.TOTP(secret)
-    uri = totp.provisioning_uri(name=email, issuer_name="redcloud")
+    uri = totp.provisioning_uri(name=email, issuer_name="redcloud_app")
     qr = qrcode.make(uri)
 
     buffer = BytesIO()

@@ -20,6 +20,8 @@ class RedcloudWindows(toga.MainWindow):
     def main_box(self):
         if self.__main_box is None:
             header_image_style = Pack(margin=10)
+            self.my_image = toga.Image("resources/redcloud.png")
+
             header_image = toga.ImageView(self.my_image, style=header_image_style)
             self.__main_box = toga.Box(children=[header_image], style=Pack(flex=1, direction=COLUMN))
 
@@ -28,8 +30,8 @@ class RedcloudWindows(toga.MainWindow):
     def __init__(self, **kwargs):
         # Créer l'image en haut et le champ de texte
         super().__init__(title="Redcloud",**kwargs)
-        CTracker.config('DEVELOPMENT')
-        self.pic = toga.Image("static/images/redcloud.png")
+        CTracker.config('PRODUCTION')
+        self.pic = toga.Image("resources/icon.png")
         self.screens = {
             'login_view': LoginScreen,
             'signin_view': SigninScreen,
@@ -50,13 +52,8 @@ class RedcloudWindows(toga.MainWindow):
 class RedcloudApp(toga.App):
     def startup(self):
         self.main_window = RedcloudWindows(size=(640, 480))
-        # Créer un canevas
         self.main_window.show()
 
 
 def main():
-    return RedcloudApp("Redcloud", "net.3p0.redcloud", icon="visuels/icon.png", author="COULEUR WEST IT", description="Redcloud application")
- # startup=None, document_types=None, on_running=None, on_exit=None
-
-if __name__ == "__main__":
-    main().main_loop()
+    return RedcloudApp("Redcloud", "net.3p0.redcloud_app", icon="resources/icon.png", author="COULEUR WEST IT", description="Redcloud application")
