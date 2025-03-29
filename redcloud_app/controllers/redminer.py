@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from dreamtools.logmng import CTracker
 from redminelib import Redmine
 from redminelib.exceptions import AuthError
 
@@ -142,7 +145,7 @@ class Redminer:
 
         raise AuthError("Échec de l'authentification : identifiants non valides")
 
-    def post_activity(self, issue_id: int, hours: float, spent_on: str, activity_id: int,
+    def post_activity(self, issue_id: int, hours: float, spent_on: datetime, activity_id: int,
                       commentaire: str, status_id: int = None, note: str = "", done_ratio: int = None):
         """
         Enregistre une activité (temps passé) sur un ticket et peut mettre à jour son statut.
@@ -151,7 +154,7 @@ class Redminer:
         :param hours: Nombre d'heures passées.
         :param spent_on: Date de l'entrée de temps.
         :param activity_id: Identifiant de l'activité.
-        :param commmentaire: Commentaire sur l'entrée de temps.
+        :param commentaire: Commentaire sur l'entrée de temps.
         :param status_id: (Optionnel) Nouveau statut du ticket.
         :param done_ratio: (Optionnel) Progression du ticket en pourcentage.
         :param note: (Optionnel) Notes supplémentaires.
@@ -166,13 +169,12 @@ class Redminer:
                 params['done_ratio'] = done_ratio
 
             if redmine_client.issue.update(issue_id, **params):
-                print("✅ Mise à jour du statut réussie.")
-
-        # Enregistrement du temps passé
-        if redmine_client.time_entry.create(issue_id, spent_on=spent_on, hours=hours,
+                CTracker.info_tracking(f'Update projet Redmine : tile entry {redmine_user}', 'Dashboard')
+                if redmine_client.time_entry.create(issue_id=issue_id, spent_on=spent_on.date(), hours=hours,
                                             activity_id=activity_id, user_id=redmine_user.id,
                                             comments=commentaire):
-            print("✅ Enregistrement du temps réussi.")
+                    return True
+        return False
 
     def document (self):
         return  {

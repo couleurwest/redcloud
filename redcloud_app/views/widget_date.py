@@ -96,6 +96,10 @@ class DateWidget(toga.Box):
             children=[ self.box_date, self.result_label ],
             style=Pack(direction='column', **kwargs)
         )
+    def reset_date(self):
+        self.day_input.value = self.__value.day
+        self.month_input.value = self.__value.month
+        self.year_input.value = self.__value.year
 
     @property
     def date_is_valid (self):
@@ -115,7 +119,6 @@ class DateWidget(toga.Box):
         return self.__is_valide
 
     def on_change_date(self, widget, **kwargs):
-        # Si le champ jour est complet (2 caractères), passer au champ mois
         self.result_label.text = ""
         if widget.value:
             if not widget.value.isdigit():

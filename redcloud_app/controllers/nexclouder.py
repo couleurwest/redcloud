@@ -1,7 +1,10 @@
 import random
 import httpx
 import urllib3
+from dreamtools.logmng import CTracker
 from httpx import HTTPStatusError
+
+from redcloud_app.controllers import Constantine
 from redcloud_app.controllers.authentication import Authentication
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -79,7 +82,6 @@ class Nextclouder:
             request = await client.post(url, headers=Nextclouder.HEADERS)
         else:
             request = await client.get(url, headers=Nextclouder.HEADERS, params=params)
-
         return request.json() if request.is_success else request.raise_for_status()  # HTTPStatusError
 
 
@@ -148,7 +150,7 @@ class Nextclouder:
         await self.httpx_requests(client, url, method='POST', params=label)
 
     async def set_comment (self, client:httpx.AsyncClient,card_id,message):
-            url = Nextclouder.__URL_LABEL_ASSIGN.format(card_id)
+            url = Nextclouder.__URL_USER_COMMENT.format(card_id)
             await self.httpx_requests(client, url, method='POST', params={'message': message})
     async def remove_label (self, client:httpx.AsyncClient, board_id, stack_id, card_id, label_id):
         url = Nextclouder.__URL_LABEL_REMOVE.format( board_id, stack_id, card_id)
@@ -165,13 +167,24 @@ class Nextclouder:
             dcm = {'title': statut[1], 'order': statut[0]}
             await self.httpx_requests(client, url, method='POST', params=dcm)
 
+    async def find_card(self, client:httpx.AsyncClient, nextcloud_board_id, nextcloud_card_title):
+        url = Nextclouder.__URL_USER_STACKS.format(nextcloud_board_id)
+        stacks = await self.httpx_requests(client, url)
+        for stack in stacks:
+            print(stack)
+            for card in stack.get('cards',[]):
+                if card['title'] == nextcloud_card_title:
+                    return stack['id'], card
+
+        return None, None
+
     async def find_or_create_card(self, client:httpx.AsyncClient, board_id, stack_id, card_title, card_description, due_date):
         current_stack_id, card = await self.find_card(client, board_id, card_title)
         if card and current_stack_id != stack_id:
             url = Nextclouder.__URL_USER_CARD_REORDER.format( board_id, current_stack_id, card['id'])
             await self.httpx_requests(client, url, method='PUT', params={'stackId': stack_id, 'order': 0})
         elif card is None:
-            due_date = due_date.isoformat() if due_date else None
+            due_date = due_date
             card = {
                 "title": card_title,
                 "type": "plain",  # "plain" (texte brut) ou "text/markdown" (formaté)
@@ -189,6 +202,7 @@ class Nextclouder:
         """CReation d'un board relatif au projet
         redmine_project : Nom du projet"""
         url = Nextclouder.__URL_USER_BOARDS
+        board = None
         boards = await self.httpx_requests(client, url, params={'details':True})
 
         for board in boards:
@@ -218,53 +232,65 @@ class Nextclouder:
     async def post_activity(self, project_name, issue_title, issue_description, issue_detail, issue_status,
                             issue_category, issue_priority, due_date):
 
-        async with httpx.AsyncClient(auth=(self.nextcloud_login, self.nextcloud_password), verify=False,base_url=self.__nextcloud_url) as client:
+        async with httpx.AsyncClient(auth=(self.__nextcloud_login, self.__nextcloud_password), verify=False,base_url=self.__nextcloud_url) as client:
             board = None
             labels_id = []
             labels_to_remove = []
             #recheche d'un bord au meme nom que le projet
-            async with httpx.AsyncClient(auth=(self.__nextcloud_login, self.__nextcloud_password), verify=False, base_url=self.__nextcloud_url) as client:
-                while issue_category or issue_priority or board is None:
-                    board = await self.find_or_create_board(client, project_name)
+            CTracker.info_tracking('Update Nextcloud : Gestion board', 'Nextclouder')
 
-                    board_id = board['id']
-                    nextcloud_label = board.pop('labels') or []
+            while issue_category or issue_priority or board is None:
+                board = await self.find_or_create_board(client, project_name)
 
-                    for label in nextcloud_label:
-                        label_id = label['id']
-                        if label['title'] == issue_category:
-                            labels_id.append(label_id)
-                            issue_category = ''
-                        elif label['title'] == issue_priority:
-                            labels_id.append(label_id)
-                            issue_priority = ''
+                board_id = board['id']
+                nextcloud_label = board.pop('labels') or []
 
-                    if issue_category:
-                        await Nextclouder.create_label(client, board_id, issue_category)
+                for label in nextcloud_label:
+                    label_id = label['id']
+                    if label['title'] == issue_category:
+                        labels_id.append(label_id)
+                        issue_category = ''
+                    elif label['title'] == issue_priority:
+                        labels_id.append(label_id)
+                        issue_priority = ''
 
-                    if issue_priority:
-                        await Nextclouder.create_label(client, board_id, issue_priority)
+                if issue_category:
+                    await self.create_label(client, board_id, issue_category)
 
-                nextcloud_stack = board.pop('stacks')
-                stacks_status = list(filter(lambda item: item[2] in issue_status.lower(), Nextclouder.LST_STATUS))
-                stack_name = stacks_status[0][1] if stacks_status else 'In stand by'
-                stacks = list(filter(lambda stack: stack['title'] ==  stack_name, nextcloud_stack))
-                stack_id = stacks[0]['id']
+                if issue_priority:
+                    await self.create_label(client, board_id, issue_priority)
+            CTracker.info_tracking('Update Nextcloud : Gestion stacks', 'Nextclouder')
 
-                #nouvelle card
-                card = await self.find_or_create_card(client, board_id, stack_id, issue_title,issue_description, due_date)
-                card_id =  card['id']
+            nextcloud_stack = board.pop('stacks')
+            stacks_status = list(filter(lambda item: item[2] in issue_status.lower(), Nextclouder.LST_STATUS))
+            stack_name = stacks_status[0][1] if stacks_status else 'In stand by'
+            stacks = list(filter(lambda stack: stack['title'] ==  stack_name, nextcloud_stack))
+            stack_id = stacks[0]['id']
 
-                for lbid in card['labels']:
-                    if lbid in labels_id:
-                        labels_id.remove(lbid)
-                    else:
-                        await self.remove_label(client, board_id, stack_id,card_id, lbid)
+            #nouvelle card
+            CTracker.info_tracking('Update Nextcloud : Gestion card', 'Nextclouder')
 
-                for lbid in labels_id:
-                    await self.assign_label(client,board_id, stack_id, card_id, lbid)
+            card = await self.find_or_create_card(client, board_id, stack_id, issue_title,issue_description, due_date)
+            card_id =  card['id']
+            CTracker.info_tracking('Update Nextcloud : Gestion Label', 'Nextclouder')
+            print(card)
+            for lbit in card.get('labels'):
+                lbid = lbit['id']
+                if lbid in labels_id:
+                    labels_id.remove(lbid)
+                else:
+                    CTracker.info_tracking(f'Update Nextcloud : Remove Label {card_id} {lbid}', 'Nextclouder')
+                    await self.remove_label(client, board_id, stack_id,card_id, lbid)
 
-                await  self.set_comment(client, card_id, issue_detail)
+            for lbid in labels_id:
+                CTracker.info_tracking('Update Nextcloud : Ajout Label', 'Nextclouder')
+                await self.assign_label(client,board_id, stack_id, card_id, lbid)
 
-                if self.nextcloud_user_id not in card.get('assignedUsers'):
-                    await self.assign_user(client, board['id'], stack_id, card_id,  self.nextcloud_user_id)
+            CTracker.info_tracking('Update Nextcloud : Gestion comments', 'Nextclouder')
+            print(issue_detail)
+            await  self.set_comment(client, card_id, issue_detail)
+
+            CTracker.info_tracking('Update Nextcloud : Gestion assigned user', 'Nextclouder')
+
+            if self.nextcloud_user_id not in card.get('assignedUsers'):
+                await self.assign_user(client, board['id'], stack_id, card_id,  self.nextcloud_user_id)

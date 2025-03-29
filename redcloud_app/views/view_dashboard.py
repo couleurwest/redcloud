@@ -66,7 +66,7 @@ class DashScreen(BoxView):
         filtered_data = [
             issue for issue in self.issues_data if project_filter == ALL_IT or issue[2] == project_filter
         ]
-        print('filtered_data', filtered_data)
+
         for issue in filtered_data:  # Limite à 20 lignes
             issue_id = issue[0]
 

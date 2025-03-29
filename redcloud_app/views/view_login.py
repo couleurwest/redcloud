@@ -1,10 +1,12 @@
 import asyncio
 
 import toga
+from dreamtools.logmng import CTracker
 from toga.style import Pack
 from toga.style.pack import COLUMN, CENTER, BOTTOM, ROW
 
-from redcloud_app.controllers import Constantine, Redminer, Nextclouder
+from redcloud_app.controllers import Constantine, Redminer
+from redcloud_app.controllers.nexclouder import Nextclouder
 from redcloud_app.views.color_palette import ColorPalette
 from redcloud_app.views.view_templates import LabelH1, HR, BoxView
 
@@ -19,12 +21,10 @@ class LoginScreen(BoxView):
 
         username_label = toga.Label("Login:", style=Pack(margin=5))
         self.username_input = toga.TextInput(placeholder="Login")
-        self.username_input.value = "dreamgeeker"
 
         # Champ mot de passe
         password_label = toga.Label("Mot de passe:", style=Pack(margin=5))
         self.password_input = toga.PasswordInput(placeholder="Mot de passe")
-        self.password_input.value = 'Dr3@mK!tch5R#76'
 
         box_subtitle_hr = HR(color=ColorPalette.SECONDARY)
 
@@ -53,10 +53,11 @@ class LoginScreen(BoxView):
                 redmine_user,
                 redmine_user_password
             )
-            print ('suite')
+            Constantine.nextcloud_account = Nextclouder(**nextcloud_account)
             is_valid = True
         except Exception as ex:
             message = ex.__str__()
+            CTracker.error_tracking(message, "viewnextcloud")
         finally:
             if is_valid:
                 self.main_window.nextscreen('otplogin_view')

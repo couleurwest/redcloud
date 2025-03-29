@@ -1,10 +1,13 @@
 import asyncio
 
 import toga
+from dreamtools.logmng import CTracker
 from toga.style import Pack
 from toga.style.pack import COLUMN, CENTER
+from watchdog.observers.fsevents2 import message
 
-from redcloud_app.controllers import Constantine, Nextclouder
+from redcloud_app.controllers import Constantine
+from redcloud_app.controllers.nexclouder import Nextclouder
 from redcloud_app.views.color_palette import ColorPalette
 from redcloud_app.views.view_templates import BoxView, LabelH2, HR
 
@@ -21,7 +24,6 @@ class NextcloudScreen(BoxView):
 
         username_label = toga.Label("Login:", style=Pack(margin=5))
         self.nextcloud_user = toga.TextInput(placeholder="Entrez votre pseudo")
-        self.nextcloud_user.value = "dreamgeeker"
 
         # Champ mot de passe
         password_label = toga.Label("Mot de passe:", style=Pack(margin=5))
@@ -30,7 +32,7 @@ class NextcloudScreen(BoxView):
         box_subtitle_hr = HR(color=ColorPalette.SECONDARY)
 
         url_label = toga.Label("URL:", style=Pack(margin=5))
-        self.nextcloud_url = toga.TextInput(placeholder="https://cie.redminer.me", style=Pack(margin=5))
+        self.nextcloud_url = toga.TextInput(style=Pack(margin=5))
 
         # Bouton de connexion
         button_validation = toga.Button("Enregistrement", on_press=lambda widget: asyncio.create_task(self.validation()))
@@ -57,11 +59,8 @@ class NextcloudScreen(BoxView):
                 self.main_window.nextscreen('otpsignin_view')
 
             self.delete_me()
-            dialog_box = toga.InfoDialog("Connexion Nextcloud", "Connexion réussie !")
         except Exception as ex:
             message = ex.__str__()
-            print(message)
-            # dialog_box = toga.ErrorDialog("Connexion Nextcloud", message)
-        finally:
-            pass
-            # asyncio.create_task(self.main_window.dialog(dialog_box))
+            CTracker.error_tracking(message, "viewnextcloud")
+            dialog_box = toga.ErrorDialog("Connexion Nextcloud", message)
+            asyncio.create_task(self.main_window.dialog(dialog_box))

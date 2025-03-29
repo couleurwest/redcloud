@@ -1,7 +1,9 @@
 import toga
+from dreamtools.logmng import CTracker
 from toga.constants import COLUMN
 from toga.style import Pack
 
+from redcloud_app.controllers import Constantine
 from redcloud_app.controllers.authentication import Authentication
 from redcloud_app.views.view_otp import OTPLoginScreen, OTPSigninScreen
 from redcloud_app.views.view_dashboard import DashScreen
@@ -27,6 +29,7 @@ class RedcloudWindows(toga.MainWindow):
     def __init__(self, **kwargs):
         # Créer l'image en haut et le champ de texte
         super().__init__(title="Redcloud",**kwargs)
+        CTracker.config('DEVELOPMENT')
         self.pic = toga.Image("static/images/redcloud.png")
         self.screens = {
             'login_view': LoginScreen,
