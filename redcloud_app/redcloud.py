@@ -3,7 +3,6 @@ from dreamtools.logmng import CTracker
 from toga.constants import COLUMN
 from toga.style import Pack
 
-from redcloud_app.controllers import Constantine
 from redcloud_app.controllers.authentication import Authentication
 from redcloud_app.views.view_otp import OTPLoginScreen, OTPSigninScreen
 from redcloud_app.views.view_dashboard import DashScreen

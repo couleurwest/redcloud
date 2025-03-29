@@ -4,8 +4,6 @@ import urllib3
 from dreamtools.logmng import CTracker
 from httpx import HTTPStatusError
 
-from redcloud_app.controllers import Constantine
-from redcloud_app.controllers.authentication import Authentication
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 

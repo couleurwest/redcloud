@@ -28,17 +28,7 @@
    ```sh
    pip install -r requirements.txt
    ```
-3. Configurez l’accès aux API dans `config.json` :
-   ```json
-   {
-     "redmine_url": "https://redmine.exemple.com",
-     "redmine_api_key": "votre_cle_api",
-     "nextcloud_url": "https://nextcloud.exemple.com",
-     "nextcloud_username": "votre_utilisateur",
-     "nextcloud_password": "votre_mot_de_passe"
-   }
-   ```
-4. Lancez le script :
+   
    ```sh
    python redcloud.py
    ```

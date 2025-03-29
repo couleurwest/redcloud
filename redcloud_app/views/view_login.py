@@ -3,7 +3,7 @@ import asyncio
 import toga
 from dreamtools.logmng import CTracker
 from toga.style import Pack
-from toga.style.pack import COLUMN, CENTER, BOTTOM, ROW
+from toga.style.pack import COLUMN, CENTER
 
 from redcloud_app.controllers import Constantine, Redminer
 from redcloud_app.controllers.nexclouder import Nextclouder
@@ -29,12 +29,15 @@ class LoginScreen(BoxView):
         box_subtitle_hr = HR(color=ColorPalette.SECONDARY)
 
         # Bouton de connexion
-        bottom_bar = toga.Box(style=Pack(direction=COLUMN, margin=5, justify_content="center", align_items="center", flex=1))
-        button_validation = toga.Button("Connexion", on_press=self.validation, style=Pack(justify_content="end", width=200))
+        bottom_bar = toga.Box(
+            style=Pack(direction=COLUMN, margin=5, justify_content="center", align_items="center", flex=1))
+        button_validation = toga.Button("Connexion", on_press=self.validation,
+                                        style=Pack(justify_content="end", width=200))
 
         bottom_bar.add(button_validation)
-        super().__init__(style= Pack(direction=COLUMN, align_items=CENTER, margin=10, gap=10),
-                         children = [box_title, box_title_hr, username_label,self.username_input, password_label, self.password_input, box_subtitle_hr,  bottom_bar])
+        super().__init__(style=Pack(direction=COLUMN, align_items=CENTER, margin=10, gap=10),
+                         children=[box_title, box_title_hr, username_label, self.username_input, password_label,
+                                   self.password_input, box_subtitle_hr, bottom_bar])
 
     def validation(self, *args, **kwargs):
         is_valid = False

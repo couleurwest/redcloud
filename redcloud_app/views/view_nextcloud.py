@@ -4,7 +4,6 @@ import toga
 from dreamtools.logmng import CTracker
 from toga.style import Pack
 from toga.style.pack import COLUMN, CENTER
-from watchdog.observers.fsevents2 import message
 
 from redcloud_app.controllers import Constantine
 from redcloud_app.controllers.nexclouder import Nextclouder
